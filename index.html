@@ -221,7 +221,7 @@
         <p class="reassure" data-i="shareIntro">Put all your BIR documents in one folder — the LoA, every notice, and your replies — then share the link. We open it read-only, and only the folder you send.</p>
         <ol class="how">
           <li data-i="how1">In Google Drive, right-click your folder → <b>Share</b>.</li>
-          <li data-i="how2">Click <b>Share</b>, add <b>[ETM-TAO email]</b>, set it to <b>Viewer</b> — not “anyone with the link.”</li>
+          <li data-i="how2">Keep it <b>private</b> — do NOT choose “anyone with the link.” We’ll request access; you just tap <b>Approve</b>.</li>
           <li data-i="how3">Click <b>Copy link</b>, then paste it below.</li>
         </ol>
         <label class="fl" for="driveLink" data-i="pasteLabel">Paste your Google Drive folder link</label>
@@ -266,7 +266,7 @@
       footBy:"by", footNote:"This page is public education, not tax or legal advice. It does not read your documents or file anything on your behalf.",
       shareStep:"Step 2 · Share your documents", shareTitle:"Share your Google Drive folder",
       shareIntro:"Put all your BIR documents in one folder — the LoA, every notice, and your replies — then share the link. We open it read-only, and only the folder you send.",
-      how1:"In Google Drive, right-click your folder → <b>Share</b>.", how2:"Click <b>Share</b>, add <b>[ETM-TAO email]</b>, set it to <b>Viewer</b> — not “anyone with the link.”", how3:"Click <b>Copy link</b>, then paste it below.",
+      how1:"In Google Drive, right-click your folder → <b>Share</b>.", how2:"Keep it <b>private</b> — do NOT choose “anyone with the link.” We’ll request access; you just tap <b>Approve</b>.", how3:"Click <b>Copy link</b>, then paste it below.",
       pasteLabel:"Paste your Google Drive folder link", invalidLink:"That doesn't look like a Google Drive link — please double-check.",
       sendCta:"Prepare my message →", sendHint:"We'll build your message, copy it, and show you how to send it on Messenger.",
       shareSafe:"Read-only, only the folder you share.", shareSafe2:"Protected under the Data Privacy Act (RA 10173); used only for your case.",
@@ -286,7 +286,7 @@
       footBy:"ng", footNote:"Ang pahinang ito ay public education, hindi tax o legal advice. Hindi nito binabasa ang iyong dokumento o naghahain para sa iyo.",
       shareStep:"Hakbang 2 · Ibahagi ang dokumento", shareTitle:"Ibahagi ang iyong Google Drive folder",
       shareIntro:"Ilagay ang lahat ng BIR documents sa isang folder — ang LoA, bawat notice, at ang iyong mga sagot — tapos ibahagi ang link. Read-only lang, at tanging ang folder na ibinahagi mo.",
-      how1:"Sa Google Drive, i-right-click ang folder → <b>Share</b>.", how2:"I-click ang <b>Share</b>, idagdag ang <b>[ETM-TAO email]</b>, itakda sa <b>Viewer</b> — hindi “anyone with the link.”", how3:"I-click ang <b>Copy link</b>, tapos i-paste dito sa baba.",
+      how1:"Sa Google Drive, i-right-click ang folder → <b>Share</b>.", how2:"Panatilihing <b>pribado</b> — HUWAG piliin ang “anyone with the link.” Hihingi kami ng access; i-<b>Approve</b> mo lang.", how3:"I-click ang <b>Copy link</b>, tapos i-paste dito sa baba.",
       pasteLabel:"I-paste ang link ng iyong Google Drive folder", invalidLink:"Mukhang hindi ito Google Drive link — pakisuri muli.",
       sendCta:"Ihanda ang aking mensahe →", sendHint:"Bubuuin namin ang mensahe mo, kokopyahin, at ipapakita kung paano i-send sa Messenger.",
       shareSafe:"Read-only, tanging ang folder na ibinahagi mo.", shareSafe2:"Protektado sa ilalim ng Data Privacy Act (RA 10173); para lang sa kaso mo.",
@@ -306,55 +306,62 @@
       footBy:"由", footNote:"本页为公共教育，非税务或法律意见。它不读取你的文件，也不代你提交任何东西。",
       shareStep:"第 2 步 · 分享你的文件", shareTitle:"分享你的 Google Drive 文件夹",
       shareIntro:"把所有 BIR 文件放进一个文件夹 — LoA、每份通知、以及你的答复 — 然后分享链接。我们只读打开，且仅限你分享的文件夹。",
-      how1:"在 Google Drive 中右键点击文件夹 → <b>共享 / Share</b>。", how2:"点击<b>共享 / Share</b>，添加 <b>[ETM-TAO email]</b>，设为<b>查看者（Viewer）</b> — 不要“知道链接的任何人”。", how3:"点击<b>复制链接 / Copy link</b>，然后粘贴到下方。",
+      how1:"在 Google Drive 中右键点击文件夹 → <b>共享 / Share</b>。", how2:"保持<b>私密</b> — 不要选“知道链接的任何人”。我们会请求访问，你点<b>批准（Approve）</b>即可。", how3:"点击<b>复制链接 / Copy link</b>，然后粘贴到下方。",
       pasteLabel:"粘贴你的 Google Drive 文件夹链接", invalidLink:"这看起来不像 Google Drive 链接 — 请再核对。",
       sendCta:"准备我的消息 →", sendHint:"我们会生成并复制你的消息，并告诉你如何在 Messenger 发送。",
       shareSafe:"只读，仅限你分享的文件夹。", shareSafe2:"受《数据隐私法》(RA 10173) 保护；仅用于你的案件。",
       orCall:"不用 Messenger？致电或短信联系我们：", callFoot:"致电或短信：" }
   };
 
+  // The due date is EXACT: receipt + period in CALENDAR days. It is NEVER moved off a
+  // weekend/holiday — safer to file BEFORE a non-working day. This list only adds a friendly
+  // "file early" note, so a stale list is cosmetic and can never shorten/lengthen the date.
+  const PH_NONWORKING = new Set(["2026-01-01","2026-04-02","2026-04-03","2026-04-09","2026-05-01","2026-06-12","2026-08-31","2026-11-30","2026-12-25","2026-12-30","2026-03-20","2026-05-27","2026-02-17","2026-04-04","2026-08-21","2026-11-01","2026-12-08","2026-12-24","2026-12-31","2027-01-01"]);
   const RESULTS = {
     en:{
       rlabel:"Due Date",
-      fileNow:"File your reply immediately.", fileLoa:"The audit is already open — don't wait.", fileUnsure:"Bring your documents in — let's pin your exact date.",
-      dueSoon:(due,left)=>`Your window may close around ${due} — about ${left} day${left===1?"":"s"} left.`,
-      overdue:(due,past)=>`Your window may have closed around ${due} — about ${past} day${past===1?"":"s"} ago. Act immediately.`,
-      pan15:"A PAN gives ~15 days from receipt to reply.",
-      d30:"An FLD/FAN, FDDA, or FD gives ~30 days from receipt to protest or appeal.",
+      fileNow:"File your reply immediately.", fileLoa:"The audit is already open — don't wait.", fileUnsure:"Bring your documents in — let's confirm your exact date.",
+      dueTitle:d=>`Your due date to file is ${d}.`,
+      nwSun:"a Sunday", nwSat:"a Saturday", nwHol:"a non-working holiday",
+      friendly:k=>`Note: this date falls on ${k}. File before it, not on it — it is always safer to file early than late.`,
+      pan15:"A PAN gives 15 days from receipt to reply.",
+      d30:"An FLD/FAN, FDDA, or FD gives 30 days from receipt to protest or appeal.",
       loaTitle:"The audit clock is already running.",
-      loanote:"An LOA means an audit is now open. The hard deadlines arrive with the notices that follow — a PAN reply is ~15 days from receipt; an FLD/FAN, FDDA, or FD is ~30. Your appraisal maps your exact clock.",
-      unsureTitle:"Let's find your deadline together.",
-      unsureBody:"Bring the documents to a Case Appraisal and we'll read the actual notice and map the exact, binding window.",
+      loanote:"An LOA means an audit is now open. The hard due dates arrive with the notices that follow — a PAN reply is 15 days from receipt; an FLD/FAN, FDDA, or FD is 30. Your appraisal maps your exact clock.",
+      unsureTitle:"Let's find your due date together.",
+      unsureBody:"Bring the documents to a Case Appraisal and we'll read the actual notice and confirm the exact date.",
       future:"That receipt date is in the future — please double-check it.",
-      disc:"Estimate only, counted from the receipt date you entered — not a binding deadline. Your paid Case Appraisal confirms the exact window from the actual document and its proof of receipt. Do not rely on this number alone."
+      disc:"Personally check its accuracy — for your safety and peace of mind. This date is computed from the receipt date you entered; your paid Case Appraisal confirms it against the actual document."
     },
     tl:{
       rlabel:"Takdang Petsa",
-      fileNow:"I-file ang iyong sagot kaagad.", fileLoa:"Bukas na ang audit — huwag maghintay.", fileUnsure:"Dalhin ang dokumento — pag-usapan natin ang eksaktong petsa.",
-      dueSoon:(due,left)=>`Maaaring magsara ang window mo bandang ${due} — mga ${left} araw na lang.`,
-      overdue:(due,past)=>`Maaaring nagsara na ang window mo bandang ${due} — mga ${past} araw na ang nakalipas. Kumilos agad.`,
-      pan15:"Ang PAN ay ~15 araw mula pagtanggap para sumagot.",
-      d30:"Ang FLD/FAN, FDDA, o FD ay ~30 araw mula pagtanggap para mag-protesta o mag-apela.",
+      fileNow:"I-file ang iyong sagot kaagad.", fileLoa:"Bukas na ang audit — huwag maghintay.", fileUnsure:"Dalhin ang dokumento — kumpirmahin natin ang eksaktong petsa.",
+      dueTitle:d=>`Ang due date mo para mag-file ay ${d}.`,
+      nwSun:"isang Linggo", nwSat:"isang Sabado", nwHol:"isang non-working holiday",
+      friendly:k=>`Paalala: ang petsang ito ay ${k}. Mag-file bago ito, hindi sa mismong araw — mas ligtas nang maaga kaysa huli.`,
+      pan15:"Ang PAN ay 15 araw mula pagtanggap para sumagot.",
+      d30:"Ang FLD/FAN, FDDA, o FD ay 30 araw mula pagtanggap para mag-protesta o mag-apela.",
       loaTitle:"Umaandar na ang orasan ng audit.",
-      loanote:"Ang LOA ay nangangahulugang bukas na ang audit. Ang mahigpit na deadline ay kasama ng susunod na notice — ang PAN ay ~15 araw mula pagtanggap; ang FLD/FAN, FDDA, o FD ay ~30. Ang appraisal ang magbibigay ng eksaktong takda mo.",
-      unsureTitle:"Hanapin natin ang deadline mo nang sabay.",
-      unsureBody:"Dalhin ang mga dokumento sa Case Appraisal at babasahin namin ang mismong notice para sa eksaktong takda.",
+      loanote:"Ang LOA ay nangangahulugang bukas na ang audit. Ang mahigpit na due date ay kasama ng susunod na notice — ang PAN ay 15 araw mula pagtanggap; ang FLD/FAN, FDDA, o FD ay 30. Ang appraisal ang magbibigay ng eksaktong takda mo.",
+      unsureTitle:"Hanapin natin ang due date mo nang sabay.",
+      unsureBody:"Dalhin ang mga dokumento sa Case Appraisal at babasahin namin ang mismong notice para sa eksaktong petsa.",
       future:"Nasa hinaharap ang petsa ng pagkatanggap — pakisuri muli.",
-      disc:"Estimate lang, bilang mula sa petsa ng pagkatanggap na inilagay mo — hindi ito ang opisyal na deadline. Ang bayad na Case Appraisal ang magkukumpirma ng eksaktong takda mula sa mismong dokumento at patunay ng pagtanggap. Huwag umasa dito lang."
+      disc:"Personal na tiyakin ang tama nito — para sa iyong kaligtasan at kapanatagan. Ang petsang ito ay batay sa petsa ng pagkatanggap na inilagay mo; kinukumpirma ito ng bayad na Case Appraisal laban sa mismong dokumento."
     },
     zh:{
       rlabel:"截止日期",
-      fileNow:"请立即提交你的答复。", fileLoa:"稽查已开始 — 不要等待。", fileUnsure:"带上你的文件 — 我们一起确定确切日期。",
-      dueSoon:(due,left)=>`你的时限可能在 ${due} 前后截止 — 大约还剩 ${left} 天。`,
-      overdue:(due,past)=>`你的时限可能已在 ${due} 前后截止 — 已过去约 ${past} 天。请立即行动。`,
-      pan15:"PAN 自收到起约 15 天内答复。",
-      d30:"FLD/FAN、FDDA 或 FD 自收到起约 30 天内抗辩或上诉。",
+      fileNow:"请立即提交你的答复。", fileLoa:"稽查已开始 — 不要等待。", fileUnsure:"带上你的文件 — 我们一起确认确切日期。",
+      dueTitle:d=>`你的提交截止日期是 ${d}。`,
+      nwSun:"星期日", nwSat:"星期六", nwHol:"非工作假期",
+      friendly:k=>`提示：该日期为${k}。请在此日期之前提交，不要拖到当天 — 早交总比晚交安全。`,
+      pan15:"PAN 自收到起 15 天内答复。",
+      d30:"FLD/FAN、FDDA 或 FD 自收到起 30 天内抗辩或上诉。",
       loaTitle:"稽查的时钟已经在走。",
-      loanote:"收到 LOA 表示稽查已开始。硬性期限随后续通知而来 — PAN 自收到约 15 天；FLD/FAN、FDDA 或 FD 约 30 天。评估会为你定出确切时限。",
-      unsureTitle:"我们一起找出你的期限。",
-      unsureBody:"把文件带到案件评估，我们会审阅原始通知并定出确切、具约束力的时限。",
+      loanote:"收到 LOA 表示稽查已开始。硬性截止日期随后续通知而来 — PAN 自收到 15 天；FLD/FAN、FDDA 或 FD 30 天。评估会为你定出确切时限。",
+      unsureTitle:"我们一起找出你的截止日期。",
+      unsureBody:"把文件带到案件评估，我们会审阅原始通知并确认确切日期。",
       future:"该收到日期在未来 — 请再核对。",
-      disc:"仅为估算，自你输入的收到日期起算 — 并非具约束力的期限。付费案件评估会依据原件及收到凭证确认确切时限。请勿仅凭此数字行事。"
+      disc:"请亲自核对其准确性 — 为了你的安全与安心。此日期依你输入的收到日期计算；付费案件评估会依据原件确认。"
     }
   };
 
@@ -385,8 +392,8 @@
     document.querySelector('input[name="doc"]').focus({preventScroll:true});
   });
 
-  function daysBetween(a,b){ return Math.round((b-a)/86400000); }
-  function fmt(d){ return d.toLocaleDateString(LANG==="zh"?"zh-CN":(LANG==="tl"?"en-PH":"en-PH"),{year:"numeric",month:"short",day:"numeric"}); }
+  const iso=d=>{const p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;};
+  function fmt(d){ const p=n=>String(n).padStart(2,"0"); return `${p(d.getMonth()+1)}/${p(d.getDate())}/${d.getFullYear()}`; } // mm/dd/yyyy
 
   function computeResult(){
     const doc = (document.querySelector('input[name="doc"]:checked')||{}).value;
@@ -401,12 +408,14 @@
 
     let title="", body="", cls="result show";
     if(period){
-      const due = new Date(d0); due.setDate(due.getDate()+period);
-      const left = daysBetween(today, due);      // + = days remaining, - = overdue
+      const due = new Date(d0); due.setDate(due.getDate()+period);   // EXACT: never moved
       const rule = doc==="pan" ? R.pan15 : R.d30;
       if(future){ title = rule; body = R.future; }
-      else if(left>=0){ title = R.dueSoon(fmt(due), left); body = rule; }
-      else { title = R.overdue(fmt(due), -left); body = rule; }
+      else {
+        const k = due.getDay()===0 ? R.nwSun : (due.getDay()===6 ? R.nwSat : (PH_NONWORKING.has(iso(due)) ? R.nwHol : ""));
+        title = R.dueTitle(fmt(due));
+        body = rule + (k ? " "+R.friendly(k) : "");
+      }
     } else if(doc==="loa"){
       title = R.loaTitle;
       body = R.loanote + (future ? " "+R.future : "");
