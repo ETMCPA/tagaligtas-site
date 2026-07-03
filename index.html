@@ -228,7 +228,7 @@
         <input type="url" id="driveLink" inputmode="url" autocomplete="off" placeholder="https://drive.google.com/drive/folders/…" aria-describedby="linkWarn">
         <div id="linkWarn" class="warn hidden" data-i="invalidLink">That doesn't look like a Google Drive link — please double-check.</div>
         <div class="ctawrap" style="padding:14px 0 0">
-          <button class="btn btn-primary" id="sendBtn" data-i="sendCta">Copy message &amp; open Messenger →</button>
+          <button class="btn btn-primary" id="sendBtn" data-i="sendCta">Prepare my message →</button>
           <div class="btn-sub" data-i="sendHint">We copy a ready message with your link — just paste it into Messenger and hit send.</div>
         </div>
         <p class="callrow"><span data-i="orCall">Don't use Messenger? Call or text us:</span><br>
@@ -268,7 +268,7 @@
       shareIntro:"Put all your BIR documents in one folder — the LoA, every notice, and your replies — then share the link. We open it read-only, and only the folder you send.",
       how1:"In Google Drive, right-click your folder → <b>Share</b>.", how2:"Set <b>General access</b> to <b>“Anyone with the link → Viewer.”</b>", how3:"Click <b>Copy link</b>, then paste it below.",
       pasteLabel:"Paste your Google Drive folder link", invalidLink:"That doesn't look like a Google Drive link — please double-check.",
-      sendCta:"Copy message &amp; open Messenger →", sendHint:"We copy a ready message with your link — just paste it into Messenger and hit send.",
+      sendCta:"Prepare my message →", sendHint:"We'll build your message, copy it, and show you how to send it on Messenger.",
       shareSafe:"Read-only, only the folder you share.", shareSafe2:"Protected under the Data Privacy Act (RA 10173); used only for your case.",
       orCall:"Don't use Messenger? Call or text us:", callFoot:"Call or text:" },
     tl:{ kicker:"Audit ng BIR? Basahin ito muna", fees:"Fixed at malinaw na bayad",
@@ -288,7 +288,7 @@
       shareIntro:"Ilagay ang lahat ng BIR documents sa isang folder — ang LoA, bawat notice, at ang iyong mga sagot — tapos ibahagi ang link. Read-only lang, at tanging ang folder na ibinahagi mo.",
       how1:"Sa Google Drive, i-right-click ang folder → <b>Share</b>.", how2:"Itakda ang <b>General access</b> sa <b>“Anyone with the link → Viewer.”</b>", how3:"I-click ang <b>Copy link</b>, tapos i-paste dito sa baba.",
       pasteLabel:"I-paste ang link ng iyong Google Drive folder", invalidLink:"Mukhang hindi ito Google Drive link — pakisuri muli.",
-      sendCta:"Kopyahin ang mensahe at buksan ang Messenger →", sendHint:"Kokopyahin namin ang mensahe kasama ang link mo — i-paste lang sa Messenger at i-send.",
+      sendCta:"Ihanda ang aking mensahe →", sendHint:"Bubuuin namin ang mensahe mo, kokopyahin, at ipapakita kung paano i-send sa Messenger.",
       shareSafe:"Read-only, tanging ang folder na ibinahagi mo.", shareSafe2:"Protektado sa ilalim ng Data Privacy Act (RA 10173); para lang sa kaso mo.",
       orCall:"Walang Messenger? Tumawag o mag-text sa amin:", callFoot:"Tumawag o mag-text:" },
     zh:{ kicker:"BIR 稽查？请先读这里", fees:"收费固定透明",
@@ -308,7 +308,7 @@
       shareIntro:"把所有 BIR 文件放进一个文件夹 — LoA、每份通知、以及你的答复 — 然后分享链接。我们只读打开，且仅限你分享的文件夹。",
       how1:"在 Google Drive 中右键点击文件夹 → <b>共享 / Share</b>。", how2:"将<b>常规访问权限</b>设为 <b>“知道链接的任何人 → 查看者（Viewer）”</b>。", how3:"点击<b>复制链接 / Copy link</b>，然后粘贴到下方。",
       pasteLabel:"粘贴你的 Google Drive 文件夹链接", invalidLink:"这看起来不像 Google Drive 链接 — 请再核对。",
-      sendCta:"复制消息并打开 Messenger →", sendHint:"我们会复制含你链接的现成消息 — 粘贴到 Messenger 发送即可。",
+      sendCta:"准备我的消息 →", sendHint:"我们会生成并复制你的消息，并告诉你如何在 Messenger 发送。",
       shareSafe:"只读，仅限你分享的文件夹。", shareSafe2:"受《数据隐私法》(RA 10173) 保护；仅用于你的案件。",
       orCall:"不用 Messenger？致电或短信联系我们：", callFoot:"致电或短信：" }
   };
@@ -443,13 +443,16 @@
   const MESSENGER = "https://m.me/327345850608888";
   const SHARE = {
     en:{ msg:l=>`Hi TagaSuri — I'd like a Case Appraisal. Here is my Google Drive folder with my BIR documents (LoA, notices, and my replies):\n${l}`,
-         copied:"✓ Message copied. Messenger is opening — paste it into the chat and hit send. If it didn't copy, copy the text below:" },
+         steps:"Almost done — 3 steps: ① Copy the message below. ② Open Messenger. ③ Press and hold in the chat to Paste, then Send.",
+         ok:"✓ Copied to your clipboard.", fail:"Couldn't copy automatically — press and hold the box below to select it, then tap Copy.", open:"Open Messenger →" },
     tl:{ msg:l=>`Kumusta TagaSuri — gusto ko ng Case Appraisal. Narito ang aking Google Drive folder kasama ang mga BIR document ko (LoA, notices, at mga sagot ko):\n${l}`,
-         copied:"✓ Nakopya ang mensahe. Bubukas ang Messenger — i-paste sa chat at i-send. Kung hindi nakopya, kopyahin ang teksto sa baba:" },
+         steps:"Malapit na — 3 hakbang: ① Kopyahin ang mensahe sa baba. ② Buksan ang Messenger. ③ Pindutin nang matagal sa chat para i-Paste, tapos i-Send.",
+         ok:"✓ Nakopya na sa iyong clipboard.", fail:"Hindi awtomatikong nakopya — pindutin nang matagal ang kahon sa baba para piliin, tapos i-tap ang Copy.", open:"Buksan ang Messenger →" },
     zh:{ msg:l=>`你好 TagaSuri — 我想申请案件评估。这是我的 Google Drive 文件夹，内含我的 BIR 文件（LoA、通知及我的答复）：\n${l}`,
-         copied:"✓ 消息已复制。Messenger 正在打开 — 粘贴到聊天并发送。若未复制，请复制下方文本：" }
+         steps:"就快好了 — 3 步：① 复制下方消息。② 打开 Messenger。③ 在聊天中长按粘贴，然后发送。",
+         ok:"✓ 已复制到剪贴板。", fail:"未能自动复制 — 长按下方方框选中，然后点复制。", open:"打开 Messenger →" }
   };
-  var lastLink = "";
+  var lastLink = "", lastOk = false;
   const driveLink = document.getElementById("driveLink");
   const linkWarn  = document.getElementById("linkWarn");
   const sentMsg   = document.getElementById("sentMsg");
@@ -457,9 +460,13 @@
   const looksLikeDrive = v => /drive\.google\.com|docs\.google\.com/i.test((v||"").trim());
   const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
-  function renderSent(){
+  function renderSent(ok){
+    if(typeof ok === "boolean") lastOk = ok;
     const S = SHARE[LANG];
-    sentMsg.innerHTML = `<div class="rbody">${S.copied}</div><div class="msgbox">${esc(S.msg(lastLink))}</div>`;
+    sentMsg.innerHTML = `<div class="rbody"><b>${S.steps}</b></div>`
+      + `<div class="msgbox">${esc(S.msg(lastLink))}</div>`
+      + `<div class="rbody" style="margin-top:8px">${lastOk ? S.ok : S.fail}</div>`
+      + `<a class="btn btn-primary" href="${MESSENGER}" target="_blank" rel="noopener" style="margin-top:12px">${S.open}</a>`;
     sentMsg.classList.remove("hidden");
   }
 
@@ -501,9 +508,12 @@
     if(!v){ linkWarn.classList.remove("hidden"); driveLink.focus(); return; }
     lastLink = v;
     const text = SHARE[LANG].msg(v);
-    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).catch(()=>{}); }
-    window.open(MESSENGER, "_blank", "noopener");
-    renderSent();
+    // Honest copy: detect real success/failure. Do NOT auto-open Messenger —
+    // the message must be visible first, and Messenger opens via the button
+    // below (a fresh user gesture, so it isn't popup-blocked).
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>renderSent(true)).catch(()=>renderSent(false));
+    } else { renderSent(false); }
     sentMsg.scrollIntoView({behavior:"smooth",block:"center"});
   });
 
