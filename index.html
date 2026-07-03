@@ -122,8 +122,11 @@
   .privacy{font-size:11px;color:var(--muted);margin:16px 0 0;text-align:center}
   .privacy b{color:var(--slate)}
 
-  footer{padding:22px 20px 30px;margin-top:20px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);text-align:center}
+  .callrow{text-align:center;font-size:13px;color:var(--muted);margin:14px 0 0;font-weight:600;line-height:1.9}
+  .callrow a{font-weight:800;font-size:15px;white-space:nowrap}
+  footer{padding:22px 20px 30px;margin-top:20px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);text-align:center;line-height:1.8}
   footer b{color:var(--slate)}
+  footer a{font-weight:700;white-space:nowrap}
   .hidden{display:none !important}
 </style>
 </head>
@@ -228,6 +231,8 @@
           <button class="btn btn-primary" id="sendBtn" data-i="sendCta">Copy message &amp; open Messenger →</button>
           <div class="btn-sub" data-i="sendHint">We copy a ready message with your link — just paste it into Messenger and hit send.</div>
         </div>
+        <p class="callrow"><span data-i="orCall">Don't use Messenger? Call or text us:</span><br>
+          <a href="tel:+639173071316">0917 307 1316</a> · <a href="tel:+639228630922">0922 863 0922</a> · <a href="tel:+639088807568">0908 880 7568</a></p>
         <div id="sentMsg" class="result out hidden" role="status" aria-live="polite"></div>
         <p class="privacy">🔒 <b data-i="shareSafe">Read-only, only the folder you share.</b> <span data-i="shareSafe2">Protected under the Data Privacy Act (RA 10173); used only for your case.</span></p>
       </div>
@@ -238,6 +243,7 @@
 
   <footer>
     <b>TagaSuri</b> <span data-i="footBy">by</span> ETM-Tax Agent Office [ETM-TAO], Inc.<br>
+    <span data-i="callFoot">Call or text:</span> <a href="tel:+639173071316">0917 307 1316</a> · <a href="tel:+639228630922">0922 863 0922</a> · <a href="tel:+639088807568">0908 880 7568</a><br>
     <span data-i="footNote">This page is public education, not tax or legal advice. It does not read your documents or file anything on your behalf.</span>
   </footer>
 </div>
@@ -263,7 +269,8 @@
       how1:"In Google Drive, right-click your folder → <b>Share</b>.", how2:"Set <b>General access</b> to <b>“Anyone with the link → Viewer.”</b>", how3:"Click <b>Copy link</b>, then paste it below.",
       pasteLabel:"Paste your Google Drive folder link", invalidLink:"That doesn't look like a Google Drive link — please double-check.",
       sendCta:"Copy message &amp; open Messenger →", sendHint:"We copy a ready message with your link — just paste it into Messenger and hit send.",
-      shareSafe:"Read-only, only the folder you share.", shareSafe2:"Protected under the Data Privacy Act (RA 10173); used only for your case." },
+      shareSafe:"Read-only, only the folder you share.", shareSafe2:"Protected under the Data Privacy Act (RA 10173); used only for your case.",
+      orCall:"Don't use Messenger? Call or text us:", callFoot:"Call or text:" },
     tl:{ kicker:"Audit ng BIR? Basahin ito muna", fees:"Fixed at malinaw na bayad",
       payoffT:"Libre: sasabihin namin ang deadline mo.", payoffS:"Delikado sa depensa mo kapag nalampasan.",
       startCta:"Libreng simula — 2 minutong check →", startSub:"Walang account. Sabihin lang kung ano at kailan.",
@@ -282,7 +289,8 @@
       how1:"Sa Google Drive, i-right-click ang folder → <b>Share</b>.", how2:"Itakda ang <b>General access</b> sa <b>“Anyone with the link → Viewer.”</b>", how3:"I-click ang <b>Copy link</b>, tapos i-paste dito sa baba.",
       pasteLabel:"I-paste ang link ng iyong Google Drive folder", invalidLink:"Mukhang hindi ito Google Drive link — pakisuri muli.",
       sendCta:"Kopyahin ang mensahe at buksan ang Messenger →", sendHint:"Kokopyahin namin ang mensahe kasama ang link mo — i-paste lang sa Messenger at i-send.",
-      shareSafe:"Read-only, tanging ang folder na ibinahagi mo.", shareSafe2:"Protektado sa ilalim ng Data Privacy Act (RA 10173); para lang sa kaso mo." },
+      shareSafe:"Read-only, tanging ang folder na ibinahagi mo.", shareSafe2:"Protektado sa ilalim ng Data Privacy Act (RA 10173); para lang sa kaso mo.",
+      orCall:"Walang Messenger? Tumawag o mag-text sa amin:", callFoot:"Tumawag o mag-text:" },
     zh:{ kicker:"BIR 稽查？请先读这里", fees:"收费固定透明",
       payoffT:"免费：我们会告诉你截止日期。", payoffS:"错过可能对你的抗辩致命。",
       startCta:"免费开始 — 两分钟检查 →", startSub:"无需注册。告诉我们你收到什么、何时收到。",
@@ -301,7 +309,8 @@
       how1:"在 Google Drive 中右键点击文件夹 → <b>共享 / Share</b>。", how2:"将<b>常规访问权限</b>设为 <b>“知道链接的任何人 → 查看者（Viewer）”</b>。", how3:"点击<b>复制链接 / Copy link</b>，然后粘贴到下方。",
       pasteLabel:"粘贴你的 Google Drive 文件夹链接", invalidLink:"这看起来不像 Google Drive 链接 — 请再核对。",
       sendCta:"复制消息并打开 Messenger →", sendHint:"我们会复制含你链接的现成消息 — 粘贴到 Messenger 发送即可。",
-      shareSafe:"只读，仅限你分享的文件夹。", shareSafe2:"受《数据隐私法》(RA 10173) 保护；仅用于你的案件。" }
+      shareSafe:"只读，仅限你分享的文件夹。", shareSafe2:"受《数据隐私法》(RA 10173) 保护；仅用于你的案件。",
+      orCall:"不用 Messenger？致电或短信联系我们：", callFoot:"致电或短信：" }
   };
 
   const RESULTS = {
