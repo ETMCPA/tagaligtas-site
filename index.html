@@ -61,6 +61,16 @@
   .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:8px 12px;
     border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--slate)}
   .badge.accred{border-color:#cfe0c2;background:var(--green-soft);color:var(--green-ink)}
+  .h-langs{font-size:12px;color:var(--muted);font-weight:600;margin-top:8px;letter-spacing:.02em}
+  .practitioner{display:flex;gap:13px;align-items:center;margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+  .pract-photo{flex:0 0 60px;width:60px;height:60px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid var(--green-soft)}
+  .pract-name{font-size:15px;font-weight:800;color:var(--navy);line-height:1.2}
+  .pract-cred{font-size:11.5px;color:var(--green-strong);font-weight:700;margin-top:2px;line-height:1.35}
+  .pract-line{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .process{margin:16px 20px 0;display:flex;flex-direction:column;gap:9px}
+  .pstep{display:flex;align-items:center;gap:11px;font-size:13px;color:var(--slate);font-weight:600}
+  .pnum{flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:var(--green-soft);color:var(--green-ink);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .securebox{background:var(--green-soft);border:1px solid #cfe0c2;border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--green-ink);line-height:1.5;margin:14px 0 4px}
 
   .payoff{margin:20px 20px 0;background:var(--navy);color:#fff;border-radius:var(--radius);padding:15px 16px;
     display:flex;align-items:center;gap:13px}
@@ -145,14 +155,22 @@
     <!-- HERO: trilingual stack is static (inclusion signal), shown in all languages -->
     <section class="hero">
       <span class="kicker"><span class="dot"></span><span data-i="kicker">BIR audit? Read this first</span></span>
-      <h1>Got a BIR letter?<br>Don't panic — know your options first.</h1>
-      <p class="h-tl">May sulat mula sa BIR? Huwag mataranta — alamin muna kung <em>valid</em> ang LOA.</p>
-      <p class="h-zh">收到 BIR 税务信？别慌，先弄清楚你的选择。</p>
+      <h1 data-i="heroH1">Got a BIR letter?<br>Don't panic — know your options first.</h1>
+      <p class="h-langs">English · Tagalog · 中文</p>
 
-      <p class="noareglo">No <em>areglo</em>. We use the law.</p>
+      <p class="noareglo" data-i="noareglo">No <em>backroom deals</em>. We use the law.</p>
       <div class="trust">
         <span class="badge accred">✓ ETM-Tax Agent Office [ETM-TAO], Inc.</span>
         <span class="badge">₱ <span data-i="fees">Fixed, transparent fees</span></span>
+      </div>
+
+      <div class="practitioner">
+        <img class="pract-photo" src="founder.jpg" alt="Emelino T. Maestro" width="60" height="60">
+        <div>
+          <div class="pract-name">Emelino T. Maestro</div>
+          <div class="pract-cred" data-i="practCred">CPA · License No. 78493 · ETM-Tax Agent Office [ETM-TAO], Inc.</div>
+          <div class="pract-line" data-i="practLine">A real accredited person reads your file — not a bot.</div>
+        </div>
       </div>
     </section>
 
@@ -169,11 +187,17 @@
       <div class="btn-sub" data-i="startSub">No signup. Tell us what you got and when.</div>
     </div>
 
-    <p class="what"><b data-i="whatLbl">What we do:</b> <span data-i="whatBody">we check whether the LOA against you was <b>validly issued</b>. If it wasn't, that's often the fastest way to stop an audit — before arguing the numbers.</span></p>
+    <p class="what"><b data-i="whatLbl">What we do:</b> <span data-i="whatBody">we check whether the LOA against you was <b>validly issued</b>. If it wasn't, that's often the fastest way to stop an audit — before arguing the numbers. <b>We don't promise a result</b> — we tell you exactly what the law and your own documents show.</span></p>
+
+    <div class="process">
+      <div class="pstep"><span class="pnum">1</span><span data-i="pstep1">You share your document folder</span></div>
+      <div class="pstep"><span class="pnum">2</span><span data-i="pstep2">An accredited practitioner reviews it</span></div>
+      <div class="pstep"><span class="pnum">3</span><span data-i="pstep3">You get a written Executive Summary</span></div>
+    </div>
 
     <!-- TRIAGE -->
     <section class="triage" id="triage" aria-labelledby="triageQ">
-      <div class="step" data-i="stepLbl">Step 1 of 1 · Free</div>
+      <div class="step" data-i="stepLbl">Free check · 2 minutes</div>
       <h2 class="q" id="triageQ" data-i="triageQ">What did you receive, and when?</h2>
       <p class="reassure" data-i="reassure">Two minutes. No account. We'll tell you if we can help and how urgent your deadline is.</p>
 
@@ -181,10 +205,10 @@
         <fieldset>
           <legend data-i="gotLbl">What you got</legend>
           <label class="opt"><input type="radio" name="doc" value="loa" required><span class="dot"></span><span data-i="optLoa">Letter of Authority (LOA / eLA)</span></label>
-          <label class="opt"><input type="radio" name="doc" value="notice"><span class="dot"></span><span data-i="optNotice">1st, 2nd, or Final Notice</span></label>
-          <label class="opt"><input type="radio" name="doc" value="nod"><span class="dot"></span><span data-i="optNod">NOD — Notice of Discrepancy</span></label>
-          <label class="opt"><input type="radio" name="doc" value="pan"><span class="dot"></span><span data-i="optPan">PAN — Preliminary Assessment Notice</span></label>
-          <label class="opt"><input type="radio" name="doc" value="d30"><span class="dot"></span><span data-i="optD30">FLD/FAN, FDDA, or FD</span></label>
+          <label class="opt"><input type="radio" name="doc" value="notice"><span class="dot"></span><span data-i="optNotice">1st, 2nd, or Final Notice — BIR asking for documents</span></label>
+          <label class="opt"><input type="radio" name="doc" value="nod"><span class="dot"></span><span data-i="optNod">NOD — Notice of Discrepancy (BIR says your numbers don't match)</span></label>
+          <label class="opt"><input type="radio" name="doc" value="pan"><span class="dot"></span><span data-i="optPan">PAN — Preliminary Assessment Notice (the BIR's first tax bill)</span></label>
+          <label class="opt"><input type="radio" name="doc" value="d30"><span class="dot"></span><span data-i="optD30">FLD/FAN, FDDA, or FD — the formal tax bill you can protest</span></label>
           <label class="opt"><input type="radio" name="doc" value="unsure"><span class="dot"></span><span data-i="optUnsure">Not sure — I'll bring it to the appraisal</span></label>
         </fieldset>
 
@@ -226,6 +250,7 @@
           <li data-i="how2">Keep it <b>private</b> — do NOT choose “anyone with the link.” We’ll request access; you just tap <b>Approve</b>.</li>
           <li data-i="how3">Click <b>Copy link</b>, then paste it below.</li>
         </ol>
+        <div class="securebox" data-i="secureBox">🔒 We open your folder <b>read-only</b> — only the folder you send. Nothing is downloaded or kept. Under the Data Privacy Act (RA 10173), your data is used only for your case.</div>
         <label class="fl" for="driveLink" data-i="pasteLabel">Paste your Google Drive folder link</label>
         <input type="url" id="driveLink" inputmode="url" autocomplete="off" placeholder="https://drive.google.com/drive/folders/…" aria-describedby="linkWarn">
         <div id="linkWarn" class="warn hidden" data-i="invalidLink">That doesn't look like a Google Drive link — please double-check.</div>
@@ -253,12 +278,16 @@
   // ---- i18n: toggleable copy (hero stack stays trilingual, hard-coded) ----
   const I18N = {
     en:{ kicker:"BIR audit? Read this first", fees:"Fixed, transparent fees",
+      heroH1:"Got a BIR letter?<br>Don't panic — know your options first.", noareglo:"No <em>backroom deals</em>. We use the law.",
+      practCred:"CPA · License No. 78493 · ETM-Tax Agent Office [ETM-TAO], Inc.", practLine:"A real accredited person reads your file — not a bot.",
+      secureBox:"🔒 We open your folder <b>read-only</b> — only the folder you send. Nothing is downloaded or kept. Under the Data Privacy Act (RA 10173), your data is used only for your case.",
+      pstep1:"You share your document folder", pstep2:"An accredited practitioner reviews it", pstep3:"You get a written Executive Summary",
       payoffT:"Free: we'll tell you your deadline.", payoffS:"Missing it can be fatal to your defense.",
       startCta:"Start free — 2-minute check →", startSub:"No signup. Tell us what you got and when.",
-      whatLbl:"What we do:", whatBody:"we check whether the LOA against you was <b>validly issued</b>. If it wasn't, that's often the fastest way to stop an audit — before arguing the numbers.",
-      stepLbl:"Step 1 of 1 · Free", triageQ:"What did you receive, and when?",
+      whatLbl:"What we do:", whatBody:"we check whether the LOA against you was <b>validly issued</b>. If it wasn't, that's often the fastest way to stop an audit — before arguing the numbers. <b>We don't promise a result</b> — we tell you exactly what the law and your own documents show.",
+      stepLbl:"Free check · 2 minutes", triageQ:"What did you receive, and when?",
       reassure:"Two minutes. No account. We'll tell you if we can help and how urgent your deadline is.",
-      gotLbl:"What you got", optLoa:"Letter of Authority (LOA / eLA)", optNotice:"1st, 2nd, or Final Notice", optNod:"NOD — Notice of Discrepancy", optPan:"PAN — Preliminary Assessment Notice", optD30:"FLD/FAN, FDDA, or FD", optUnsure:"Not sure — I'll bring it to the appraisal",
+      gotLbl:"What you got", optLoa:"Letter of Authority (LOA / eLA)", optNotice:"1st, 2nd, or Final Notice — BIR asking for documents", optNod:"NOD — Notice of Discrepancy (BIR says your numbers don't match)", optPan:"PAN — Preliminary Assessment Notice (the BIR's first tax bill)", optD30:"FLD/FAN, FDDA, or FD — the formal tax bill you can protest", optUnsure:"Not sure — I'll bring it to the appraisal",
       dateLbl:"Date you received it", dateHelp:"Use the date you <b>received</b> it — not the date printed on the letter. The clock runs from receipt.", checkCta:"See my due date to file a protest →",
       chooseStep:"What would you like to get?", wantEs:"Executive Summary", wantSd:"Statutory Demand for Declaration of Nullity of the Letter of Authority", contCta:"Continue — share your documents →",
       apprCta:"See my options — book a Case Appraisal →", apprSub:"₱5,000 + VAT · credited to your case if you proceed · we reply by email.",
@@ -273,12 +302,16 @@
       shareSafe:"Read-only, only the folder you share.", shareSafe2:"Protected under the Data Privacy Act (RA 10173); used only for your case.",
       fbDetails:"Visit Kataxpayer FB for Details" },
     tl:{ kicker:"Audit ng BIR? Basahin ito muna", fees:"Fixed at malinaw na bayad",
+      heroH1:"May sulat mula sa BIR?<br>Huwag mataranta — alamin muna ang mga opsyon mo.", noareglo:"Walang <em>areglo</em>. Ginagamit namin ang batas.",
+      practCred:"CPA · Lisensya Blg. 78493 · ETM-Tax Agent Office [ETM-TAO], Inc.", practLine:"May tunay na akreditadong tao ang bumabasa ng iyong file — hindi bot.",
+      secureBox:"🔒 Binubuksan namin ang folder mo <b>read-only</b> — tanging ang folder na ipinadala mo. Walang dina-download o itinatago. Sa ilalim ng Data Privacy Act (RA 10173), ang data mo ay para lang sa kaso mo.",
+      pstep1:"Ibinabahagi mo ang iyong folder ng dokumento", pstep2:"Sinusuri ito ng akreditadong practitioner", pstep3:"Makakakuha ka ng nakasulat na Executive Summary",
       payoffT:"Libre: sasabihin namin ang deadline mo.", payoffS:"Delikado sa depensa mo kapag nalampasan.",
       startCta:"Libreng simula — 2 minutong check →", startSub:"Walang account. Sabihin lang kung ano at kailan.",
-      whatLbl:"Ang ginagawa namin:", whatBody:"sinusuri namin kung <b>valid ba ang pagkakaisyu</b> ng LOA laban sa iyo. Kung hindi, ito ang madalas na pinakamabilis na paraan para mapatigil ang audit.",
-      stepLbl:"Hakbang 1 ng 1 · Libre", triageQ:"Ano ang natanggap mo, at kailan?",
+      whatLbl:"Ang ginagawa namin:", whatBody:"sinusuri namin kung <b>valid ba ang pagkakaisyu</b> ng LOA laban sa iyo. Kung hindi, ito ang madalas na pinakamabilis na paraan para mapatigil ang audit. <b>Hindi kami nangangako ng resulta</b> — sinasabi namin nang eksakto ang ipinapakita ng batas at ng sarili mong dokumento.",
+      stepLbl:"Libreng check · 2 minuto", triageQ:"Ano ang natanggap mo, at kailan?",
       reassure:"Dalawang minuto. Walang account. Sasabihin namin kung matutulungan ka namin at gaano ka-urgent.",
-      gotLbl:"Ano ang natanggap", optLoa:"Letter of Authority (LOA / eLA)", optNotice:"1st, 2nd, o Final Notice", optNod:"NOD — Notice of Discrepancy", optPan:"PAN — Preliminary Assessment Notice", optD30:"FLD/FAN, FDDA, o FD", optUnsure:"Hindi sigurado — dadalhin ko sa appraisal",
+      gotLbl:"Ano ang natanggap", optLoa:"Letter of Authority (LOA / eLA)", optNotice:"1st, 2nd, o Final Notice — hinihingi ng BIR ang mga dokumento", optNod:"NOD — Notice of Discrepancy (sabi ng BIR hindi tugma ang numero mo)", optPan:"PAN — Preliminary Assessment Notice (unang singil ng BIR)", optD30:"FLD/FAN, FDDA, o FD — ang pormal na singil na puwede mong iprotesta", optUnsure:"Hindi sigurado — dadalhin ko sa appraisal",
       dateLbl:"Petsa ng pagkatanggap", dateHelp:"Gamitin ang petsa ng <b>pagkatanggap</b> — hindi ang petsang nakalimbag sa sulat. Mula sa pagtanggap tumatakbo ang orasan.", checkCta:"Tingnan ang due date para mag-file ng protesta →",
       chooseStep:"Ano ang gusto mong makuha?", wantEs:"Executive Summary", wantSd:"Statutory Demand for Declaration of Nullity of the Letter of Authority", contCta:"Magpatuloy — ibahagi ang dokumento →",
       apprCta:"Tingnan ang options — mag-book ng Case Appraisal →", apprSub:"₱5,000 + VAT · ibabawas sa kaso kung magpapatuloy · sasagot kami sa email.",
@@ -293,12 +326,16 @@
       shareSafe:"Read-only, tanging ang folder na ibinahagi mo.", shareSafe2:"Protektado sa ilalim ng Data Privacy Act (RA 10173); para lang sa kaso mo.",
       fbDetails:"Bisitahin ang Kataxpayer FB para sa Detalye" },
     zh:{ kicker:"BIR 稽查？请先读这里", fees:"收费固定透明",
+      heroH1:"收到 BIR 税务信？<br>别慌，先弄清楚你的选择。", noareglo:"不搞私下交易 — 我们依法办事。",
+      practCred:"注册会计师（CPA）· 执照号 78493 · ETM-Tax Agent Office [ETM-TAO], Inc.", practLine:"由真正的持牌专业人士审阅你的文件 — 不是机器人。",
+      secureBox:"🔒 我们以<b>只读</b>方式打开你的文件夹 — 仅限你发送的文件夹。不下载、不留存。依据《数据隐私法》(RA 10173)，你的数据仅用于你的案件。",
+      pstep1:"你分享你的文件夹", pstep2:"由持牌专业人士审阅", pstep3:"你获得书面行政摘要",
       payoffT:"免费：我们会告诉你截止日期。", payoffS:"错过可能对你的抗辩致命。",
       startCta:"免费开始 — 两分钟检查 →", startSub:"无需注册。告诉我们你收到什么、何时收到。",
-      whatLbl:"我们做什么：", whatBody:"我们审查针对你的授权书是否<b>合法签发</b>。若不合法，这往往是最快叫停稽查的方式 — 在争论数字之前。",
-      stepLbl:"第 1 步（共 1 步）· 免费", triageQ:"你收到了什么，何时收到？",
+      whatLbl:"我们做什么：", whatBody:"我们审查针对你的授权书是否<b>合法签发</b>。若不合法，这往往是最快叫停稽查的方式 — 在争论数字之前。<b>我们不承诺结果</b> — 我们如实告诉你法律和你自己的文件显示了什么。",
+      stepLbl:"免费检查 · 2 分钟", triageQ:"你收到了什么，何时收到？",
       reassure:"两分钟。无需注册。我们会告诉你能否帮忙，以及你的期限有多紧迫。",
-      gotLbl:"你收到什么", optLoa:"稽查授权书（LOA / eLA）", optNotice:"第一次 / 第二次 / 最终通知", optNod:"NOD — 差异通知书（Notice of Discrepancy）", optPan:"PAN — 初步评税通知", optD30:"FLD/FAN、FDDA 或 FD", optUnsure:"不确定 — 评估时我会带来",
+      gotLbl:"你收到什么", optLoa:"稽查授权书（LOA / eLA）", optNotice:"第一次 / 第二次 / 最终通知 — BIR 索取文件", optNod:"NOD — 差异通知书（BIR 认为你的数字对不上）", optPan:"PAN — 初步评税通知（BIR 的首份税单）", optD30:"FLD/FAN、FDDA 或 FD — 可提出抗议的正式税单", optUnsure:"不确定 — 评估时我会带来",
       dateLbl:"你收到的日期", dateHelp:"请用你<b>收到</b>的日期 — 不是信上打印的日期。时限自收到起算。", checkCta:"查看我提交抗辩的截止日期 →",
       chooseStep:"你想获得什么？", wantEs:"行政摘要（Executive Summary）", wantSd:"就授权书宣告无效的法定要求书（Statutory Demand）", contCta:"继续 — 分享你的文件 →",
       apprCta:"查看方案 — 预约案件评估 →", apprSub:"₱5,000 + 增值税 · 若继续委托可抵扣 · 我们以电邮回复。",
@@ -398,7 +435,7 @@
   });
 
   const iso=d=>{const p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;};
-  function fmt(d){ const p=n=>String(n).padStart(2,"0"); return `${p(d.getMonth()+1)}/${p(d.getDate())}/${d.getFullYear()}`; } // mm/dd/yyyy
+  function fmt(d){ const M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return `${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}`; } // e.g. 14 Apr 2026 — unambiguous
 
   function computeResult(){
     const doc = (document.querySelector('input[name="doc"]:checked')||{}).value;
