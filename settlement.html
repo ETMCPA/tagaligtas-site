@@ -207,7 +207,7 @@
   // Rollout order: PayMongo → BPI OneQR → UnionBank.
   const PROVIDERS = [
     // FILL-IN gcash: replace the number + registered name below.
-    { id:"gcash", type:"manual", active:true, icon:"📱",
+    { id:"gcash", type:"manual", active:false, icon:"📱",
       name:{en:"GCash", tl:"GCash", zh:"GCash"},
       rail:"Track G", verification:"manual", factumSource:"ledger-review", releaseMode:"hold-until-verified",
       detail:`<b class="fillin" data-fill="gcash">0917 XXX XXXX</b> — <span class="fillin" data-fill="gcash">ETM-TAO / [Registered Name]</span>`,
@@ -215,14 +215,15 @@
                      tl:"Magpadala sa GCash number sa itaas, tapos isumite ang iyong reference.",
                      zh:"向上方 GCash 号码付款，然后提交你的参考号。" } },
     // FILL-IN bank: replace bank name, account name, account number below.
-    { id:"bank", type:"manual", active:true, icon:"🏦",
+    { id:"bank", type:"manual", active:false, icon:"🏦",
       name:{en:"Bank Transfer", tl:"Bank Transfer", zh:"银行转账"},
       rail:"Track G", verification:"manual", factumSource:"bank-ledger", releaseMode:"hold-until-verified",
       detail:`<span class="fillin" data-fill="bank">[Bank name]</span> · <span class="fillin" data-fill="bank">[Account name]</span> · <b class="fillin" data-fill="bank">[Account number]</b>` },
     // ---- pre-listed, inactive gateways (flip active:true + wire the backend hook when launching) ----
-    // PayMongo wired + tested privately, but kept INACTIVE for the public FB stress-test
-    // (test mode can't take real payments). Flip active:true again once PayMongo is LIVE.
-    { id:"paymongo",  type:"gateway", active:false, icon:"💳",
+    // PayMongo-only checkout (founder directive). SOLE active rail; GCash/Bank deactivated.
+    // NOTE: works only once PAYMONGO_SECRET_KEY is set on Supabase project aodkheohhbzcgvzhjekx
+    // AND (for real money) PayMongo is switched from test to LIVE keys.
+    { id:"paymongo",  type:"gateway", active:true, icon:"💳",
       name:{en:"Pay online (card / GCash / Maya)", tl:"Magbayad online (card / GCash / Maya)", zh:"在线支付（银行卡 / GCash / Maya）"},
       rail:"Track A", verification:"webhook", factumSource:"payment-provider-event", releaseMode:"auto-after-paid-webhook", detail:"" },
     { id:"bpi-oneqr", type:"gateway", active:false, icon:"🔳",
