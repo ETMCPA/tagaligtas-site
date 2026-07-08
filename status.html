@@ -1,0 +1,388 @@
+<!doctype html>
+<!--
+  ============================ TRACK YOUR ORDER (status.html) ============================
+  Courier-style tracking (LBC / FedEx / PhilPost feel) for a TagaLigtas order.
+  Access: status.html?order=[order_no]&t=[token]  (magic link from the confirmation/thank-you email)
+  Data:   read-only Edge Function get-status (POST {order_no, token}) — token-gated, rate-limited.
+          RLS stays closed to anon; the function is the only read path.
+  Self-test locally with ?demo=1 (uses mock data; no backend needed).
+  Live updates: polls get-status every 20s (no manual refresh). True Supabase Realtime would
+  need a broadcast channel or a token-scoped policy — deferred; polling keeps RLS closed.
+  =======================================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TagaLigtas — Track your order</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0f2540">
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --navy:#0f2540; --slate:#334155; --muted:#64748b; --line:#e5e9ef;
+    --bg:#f6f8f5; --card:#ffffff;
+    --green:#87ab69; --green-soft:#eef4e9; --green-strong:#4f6b3a; --green-ink:#3c5230;
+    --amber:#b45309; --amber-soft:#fff7ed; --amber-line:#fed7aa;
+    --radius:14px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);font-family:var(--font);color:var(--navy);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:480px;margin:0 auto;background:var(--card);min-height:100vh;box-shadow:0 0 60px rgba(15,37,64,.06)}
+  a{color:var(--green-strong)}
+  :focus-visible{outline:3px solid var(--green);outline-offset:2px;border-radius:6px}
+  header{position:sticky;top:0;z-index:10;display:flex;flex-direction:column;gap:10px;
+    padding:12px 18px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .logo{font-weight:800;font-size:17px;letter-spacing:-.02em;color:var(--navy);text-decoration:none}
+  .logo span{color:#1f51ff;-webkit-text-stroke:.25px #000;text-stroke:.25px #000;paint-order:stroke fill}
+  .langtabs{display:flex;gap:4px;background:var(--green-soft);border-radius:999px;padding:4px}
+  .langtabs button{flex:1;font:inherit;font-size:13px;font-weight:700;color:var(--slate);background:none;border:none;
+    padding:9px 8px;border-radius:999px;cursor:pointer;min-height:40px;transition:background .15s,color .15s}
+  .langtabs button[aria-pressed="true"]{background:var(--green-strong);color:#fff;box-shadow:0 1px 3px rgba(15,37,64,.18)}
+  main{padding:22px 20px 30px}
+  .tlabel{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--green-strong)}
+  .ono{font-size:22px;font-weight:800;letter-spacing:.01em;color:var(--navy);font-variant-numeric:tabular-nums;margin:3px 0 2px;word-break:break-all}
+  .headline{font-size:15px;font-weight:700;color:var(--slate);margin-top:6px}
+  .dueby{display:inline-flex;align-items:center;gap:7px;background:var(--green-soft);color:var(--green-ink);border:1px solid #cfe0c2;
+    border-radius:999px;font-size:12.5px;font-weight:700;padding:8px 13px;margin-top:12px}
+  /* exception banners */
+  .exc{border-radius:12px;padding:12px 14px;font-size:13px;font-weight:700;line-height:1.5;margin-top:14px}
+  .exc.block{background:var(--amber-soft);border:1px solid var(--amber-line);color:var(--amber)}
+  .exc.fail{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c}
+  /* current-stage block */
+  .now{background:var(--navy);color:#fff;border-radius:var(--radius);padding:15px 16px;margin-top:16px}
+  .now h3{font-size:13px;font-weight:800;letter-spacing:.02em;margin-bottom:9px;color:#fff}
+  .now .row{display:flex;gap:9px;font-size:12.5px;color:#cdd8e6;margin-top:6px;line-height:1.45}
+  .now .row b{color:#fff;flex:0 0 auto}
+  .now .help{margin-top:11px;font-size:12.5px}
+  .now .help a{color:#9fd08a;font-weight:700}
+  /* timeline */
+  .tlhead{font-size:13px;font-weight:800;color:var(--navy);margin:22px 0 6px}
+  .timeline{list-style:none;position:relative;margin-top:8px}
+  .ms{display:flex;gap:14px;position:relative;padding-bottom:20px}
+  .ms:last-child{padding-bottom:0}
+  .ms .col{flex:0 0 26px;display:flex;flex-direction:column;align-items:center}
+  .ms .ico{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:800;flex:0 0 26px;border:2px solid var(--line);background:#fff;color:var(--muted);z-index:1}
+  .ms .stem{flex:1 1 auto;width:2px;background:var(--line);margin-top:2px;min-height:14px}
+  .ms:last-child .stem{display:none}
+  .ms.done .ico{background:var(--green-strong);border-color:var(--green-strong);color:#fff}
+  .ms.done .stem{background:var(--green)}
+  .ms.current .ico{border-color:var(--green-strong);color:var(--green-strong);box-shadow:0 0 0 4px var(--green-soft);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px var(--green-soft)}50%{box-shadow:0 0 0 7px var(--green-soft)}}
+  .ms .body{flex:1;min-width:0;padding-top:1px}
+  .ms .mlabel{font-size:14px;font-weight:800;color:var(--navy);line-height:1.3}
+  .ms.pending .mlabel{color:var(--muted)}
+  .ms .opt{font-size:10.5px;font-weight:700;color:var(--muted);margin-left:6px;text-transform:uppercase;letter-spacing:.03em}
+  .ms .mline{font-size:12.5px;color:var(--slate);margin-top:2px;line-height:1.4}
+  .ms.pending .mline{color:var(--muted)}
+  .ms .mtime{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+  /* courier tracking */
+  .courier{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-top:8px;background:#fff}
+  .courier .ct-lbl{font-size:11px;font-weight:800;color:var(--green-strong);letter-spacing:.04em;text-transform:uppercase}
+  .courier .ct-no{font-size:14px;font-weight:800;color:var(--navy);margin-top:3px;font-variant-numeric:tabular-nums}
+  .courier a.ct-link{display:inline-block;margin-top:8px;font-size:13px;font-weight:800}
+  .msg{margin-top:18px;font-size:13.5px;color:var(--slate);line-height:1.6}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--green-strong);
+    border-radius:50%;animation:rot .8s linear infinite;vertical-align:-3px;margin-right:8px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  footer{padding:22px 20px 30px;margin-top:22px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);text-align:center;line-height:1.8}
+  footer b{color:var(--slate)}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="index.html" class="logo">Taga<span>Ligtas</span></a>
+    <div class="langtabs" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">English</button>
+      <button data-lang="tl" aria-pressed="false">Pilipino</button>
+      <button data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="loading" class="msg"><span class="spin"></span><span data-i="loading">Loading your order…</span></div>
+    <div id="err" class="msg hidden"></div>
+
+    <div id="tracker" class="hidden">
+      <div class="tlabel" data-i="trackLbl">Track your order</div>
+      <div class="ono" id="ono"></div>
+      <div class="headline" id="headline"></div>
+      <div class="dueby hidden" id="dueby">🗓 <span id="duebyText"></span></div>
+
+      <div id="excBox" class="hidden"></div>
+
+      <div class="now" id="nowBox">
+        <h3 id="nowTitle"></h3>
+        <div class="row"><b data-i="nowWhat">Now:</b> <span id="nowWhat"></span></div>
+        <div class="row"><b data-i="nowWait">Waiting for:</b> <span id="nowWait"></span></div>
+        <div class="row"><b data-i="nowWho">Who acts next:</b> <span id="nowWho"></span></div>
+        <div class="help"><span data-i="needHelp">Need help?</span> <a id="helpLink" href="https://facebook.com/kataxpayer" target="_blank" rel="noopener" data-i="contact">Message us on Facebook</a></div>
+      </div>
+
+      <div class="tlhead" data-i="tlHead">Order progress</div>
+      <ul class="timeline" id="timeline"></ul>
+
+      <div id="courier" class="courier hidden">
+        <div class="ct-lbl" data-i="ctLbl">Courier delivery to BIR</div>
+        <div class="ct-no" id="ctNo"></div>
+        <a class="ct-link" id="ctLink" href="#" target="_blank" rel="noopener" data-i="ctTrack">Track parcel →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <b>TagaLigtas</b> <span data-i="footBy">by</span> ETM-Tax Agent Office [ETM-TAO], Inc.<br>
+    <span data-i="footNote">This tracker shows the status of your order. Not tax or legal advice.</span>
+  </footer>
+</div>
+
+<script>
+  // ---------------- config ----------------
+  var GET_STATUS_FN = "https://aodkheohhbzcgvzhjekx.supabase.co/functions/v1/get-status";
+  var POLL_MS = 20000;
+
+  // ---------------- i18n ----------------
+  var I18N = {
+    en:{ loading:"Loading your order…", trackLbl:"Track your order", tlHead:"Order progress",
+      nowWhat:"Now:", nowWait:"Waiting for:", nowWho:"Who acts next:", needHelp:"Need help?", contact:"Message us on Facebook",
+      ctLbl:"Courier delivery to BIR", ctTrack:"Track parcel →", footBy:"by",
+      footNote:"This tracker shows the status of your order. Not tax or legal advice.",
+      dueBy:function(d){return "Executive Summary due by "+d;},
+      errNoLink:"This link is incomplete. Please open the tracking link from your email.",
+      errNotFound:"We couldn't find this order. Please check the link in your email, or message us.",
+      errGeneric:"We couldn't load your order right now. Please try again shortly.",
+      sentTo:function(e){return "Check your email: "+e;},
+      ms:{ received:"Order received", paid:"Payment confirmed", prep:"In preparation", ready:"Ready — sent to your email",
+        drafting:"Drafting your Demand / Request", served:"Served / filed to the BIR" },
+      msline:{ received:"We received your order and documents.", paid:"Your payment is confirmed.",
+        prep:"A TaxSpecialist is preparing your Executive Summary.", ready:"Your Executive Summary and BIR-registered Invoice were sent to your email.",
+        drafting:"We're drafting your Statutory Demand or Request.", served:"Your instrument was filed/served to the BIR." },
+      optNote:"if you proceed",
+      headline:{ received:"Order received — awaiting payment.", paid:"Payment confirmed — we're starting.",
+        prep:"Your Executive Summary is being prepared.", ready:"Your Executive Summary is ready.",
+        drafting:"Your Demand / Request is being drafted.", served:"Filed to the BIR.", done:"Engagement complete.",
+        blocked:"We need an action from you.", failed:"There's a payment/intake issue." },
+      now:{ received:{what:"We've logged your order and are awaiting your payment.", wait:"Your payment.", who:"You — complete payment to begin."},
+        paid:{what:"Payment confirmed. Your case is queued to start.", wait:"Nothing from you — we're on it.", who:"A TaxSpecialist."},
+        prep:{what:"A TaxSpecialist is examining your LoA and drafting your Executive Summary.", wait:"Nothing from you.", who:"A TaxSpecialist."},
+        ready:{what:"Your Executive Summary was sent to your email.", wait:"Your review — and your decision on next steps.", who:"You."},
+        drafting:{what:"We're drafting your Statutory Demand or Request for your exact notice.", wait:"Nothing from you.", who:"A TaxSpecialist."},
+        served:{what:"Your instrument was filed/served to the BIR.", wait:"BIR response.", who:"You / the BIR."} },
+      excBlock:function(x){return "Needs your action: "+(x||"please check your email.");},
+      excFail:"Payment or intake issue — we're on it. We'll reach you shortly." },
+    tl:{ loading:"Kinukuha ang iyong order…", trackLbl:"Subaybayan ang iyong order", tlHead:"Progreso ng order",
+      nowWhat:"Ngayon:", nowWait:"Hinihintay:", nowWho:"Susunod na kikilos:", needHelp:"Kailangan ng tulong?", contact:"I-message kami sa Facebook",
+      ctLbl:"Paghahatid ng courier sa BIR", ctTrack:"Subaybayan ang parcel →", footBy:"ng",
+      footNote:"Ipinapakita ng tracker na ito ang status ng iyong order. Hindi tax o legal advice.",
+      dueBy:function(d){return "Executive Summary matatapos bago ang "+d;},
+      errNoLink:"Hindi kumpleto ang link. Buksan ang tracking link mula sa iyong email.",
+      errNotFound:"Hindi namin nahanap ang order na ito. Suriin ang link sa iyong email, o i-message kami.",
+      errGeneric:"Hindi ma-load ang iyong order ngayon. Subukan muli mamaya.",
+      sentTo:function(e){return "Tingnan ang iyong email: "+e;},
+      ms:{ received:"Natanggap ang order", paid:"Kumpirmado ang bayad", prep:"Ginagawa na", ready:"Handa na — ipinadala sa iyong email",
+        drafting:"Dini-draft ang iyong Demand / Request", served:"Na-file / na-serve sa BIR" },
+      msline:{ received:"Natanggap namin ang iyong order at dokumento.", paid:"Kumpirmado ang iyong bayad.",
+        prep:"May TaxSpecialist na naghahanda ng iyong Executive Summary.", ready:"Ang iyong Executive Summary at BIR-registered Invoice ay ipinadala sa iyong email.",
+        drafting:"Dini-draft namin ang iyong Statutory Demand o Request.", served:"Ang iyong instrumento ay na-file/na-serve sa BIR." },
+      optNote:"kung magpapatuloy",
+      headline:{ received:"Natanggap ang order — hinihintay ang bayad.", paid:"Kumpirmado ang bayad — sinisimulan na namin.",
+        prep:"Ginagawa na ang iyong Executive Summary.", ready:"Handa na ang iyong Executive Summary.",
+        drafting:"Dini-draft na ang iyong Demand / Request.", served:"Na-file na sa BIR.", done:"Tapos na ang engagement.",
+        blocked:"May kailangan kaming aksyon mula sa iyo.", failed:"May isyu sa bayad/intake." },
+      now:{ received:{what:"Nailista na ang iyong order at hinihintay ang bayad mo.", wait:"Ang iyong bayad.", who:"Ikaw — bayaran para magsimula."},
+        paid:{what:"Kumpirmado ang bayad. Naka-queue nang magsimula ang kaso mo.", wait:"Wala mula sa iyo — kami na.", who:"Isang TaxSpecialist."},
+        prep:{what:"May TaxSpecialist na sumusuri ng iyong LoA at gumagawa ng Executive Summary.", wait:"Wala mula sa iyo.", who:"Isang TaxSpecialist."},
+        ready:{what:"Ipinadala sa iyong email ang Executive Summary mo.", wait:"Ang iyong review — at desisyon sa susunod.", who:"Ikaw."},
+        drafting:{what:"Dini-draft namin ang iyong Statutory Demand o Request para sa eksaktong notice mo.", wait:"Wala mula sa iyo.", who:"Isang TaxSpecialist."},
+        served:{what:"Ang iyong instrumento ay na-file/na-serve sa BIR.", wait:"Sagot ng BIR.", who:"Ikaw / ang BIR."} },
+      excBlock:function(x){return "Kailangan ng iyong aksyon: "+(x||"pakisuri ang iyong email.");},
+      excFail:"May isyu sa bayad o intake — kami na. Makikipag-ugnayan kami sa iyo." },
+    zh:{ loading:"正在加载你的订单…", trackLbl:"追踪你的订单", tlHead:"订单进度",
+      nowWhat:"当前：", nowWait:"等待：", nowWho:"下一步由谁处理：", needHelp:"需要帮助？", contact:"在 Facebook 联系我们",
+      ctLbl:"快递送达 BIR", ctTrack:"追踪包裹 →", footBy:"由",
+      footNote:"此页面显示你订单的状态。非税务或法律意见。",
+      dueBy:function(d){return "行政摘要将于 "+d+" 前完成";},
+      errNoLink:"链接不完整。请从你的电邮打开追踪链接。",
+      errNotFound:"找不到此订单。请检查电邮中的链接，或联系我们。",
+      errGeneric:"暂时无法加载你的订单。请稍后重试。",
+      sentTo:function(e){return "请查看你的电邮："+e;},
+      ms:{ received:"已收到订单", paid:"付款已确认", prep:"准备中", ready:"已就绪 — 已发送到你的电邮",
+        drafting:"正在起草你的要求书 / 请求书", served:"已向 BIR 提交 / 送达" },
+      msline:{ received:"我们已收到你的订单和文件。", paid:"你的付款已确认。",
+        prep:"TaxSpecialist 正在准备你的行政摘要。", ready:"你的行政摘要与 BIR 正式发票已发送到你的电邮。",
+        drafting:"我们正在起草你的法定要求书或请求书。", served:"你的文书已向 BIR 提交/送达。" },
+      optNote:"若你继续",
+      headline:{ received:"已收到订单 — 等待付款。", paid:"付款已确认 — 我们即将开始。",
+        prep:"你的行政摘要正在准备中。", ready:"你的行政摘要已就绪。",
+        drafting:"你的要求书 / 请求书正在起草。", served:"已向 BIR 提交。", done:"委托已完成。",
+        blocked:"我们需要你采取行动。", failed:"付款/接收出现问题。" },
+      now:{ received:{what:"我们已记录你的订单，正在等待你的付款。", wait:"你的付款。", who:"你 — 完成付款即可开始。"},
+        paid:{what:"付款已确认。你的案件已排队开始。", wait:"无需你处理 — 交给我们。", who:"一位 TaxSpecialist。"},
+        prep:{what:"TaxSpecialist 正在审查你的 LoA 并起草行政摘要。", wait:"无需你处理。", who:"一位 TaxSpecialist。"},
+        ready:{what:"你的行政摘要已发送到你的电邮。", wait:"你的审阅 — 以及下一步的决定。", who:"你。"},
+        drafting:{what:"我们正在为你的确切通知起草法定要求书或请求书。", wait:"无需你处理。", who:"一位 TaxSpecialist。"},
+        served:{what:"你的文书已向 BIR 提交/送达。", wait:"BIR 的回应。", who:"你 / BIR。"} },
+      excBlock:function(x){return "需要你采取行动："+(x||"请查看你的电邮。");},
+      excFail:"付款或接收出现问题 — 交给我们。我们会尽快联系你。" }
+  };
+
+  // milestone order + which internal states map to each milestone rank
+  var MS = [
+    {key:"received", rank:0},
+    {key:"paid",     rank:1},
+    {key:"prep",     rank:2},
+    {key:"ready",    rank:3},
+    {key:"drafting", rank:4, opt:true},
+    {key:"served",   rank:5, opt:true}
+  ];
+  var STATE_RANK = {
+    started:-1, folder_requested:0, folder_shared:0, defect_count_review:0, defect_count_ready:0,
+    exec_summary_offered:0, checkout_started:0, payment_pending:0, awaiting_payment:0,
+    payment_confirmed:1, paid_confirmed:1,
+    exec_summary_prep:2, exec_summary_ready:3,
+    clarification_offered:4, drafting:4, ready_for_service:5, completed:5
+  };
+  // which internal states "stamp" each milestone (for timestamps from order_events)
+  var MS_STATES = {
+    received:["folder_shared","checkout_started","payment_pending","awaiting_payment"],
+    paid:["payment_confirmed","paid_confirmed"],
+    prep:["exec_summary_prep"], ready:["exec_summary_ready"],
+    drafting:["clarification_offered","drafting"], served:["ready_for_service","completed"]
+  };
+  var HEADLINE_KEY = {0:"received",1:"paid",2:"prep",3:"ready",4:"drafting",5:"served"};
+
+  // ---------------- helpers ----------------
+  var LANG="en", DATA=null;
+  function qp(k){ var m=new RegExp("[?&]"+k+"=([^&#]+)").exec(location.search); return m?decodeURIComponent(m[1]):""; }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function fmtDate(iso){ if(!iso) return ""; var d=new Date(iso); if(isNaN(d)) return "";
+    var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var h=d.getHours(), ap=h<12?"AM":"PM", hr=(h%12)||12, mi=String(d.getMinutes()).padStart(2,"0");
+    return d.getDate()+" "+M[d.getMonth()]+" "+d.getFullYear()+", "+hr+":"+mi+" "+ap; }
+  function fmtDay(iso){ if(!iso) return ""; var d=new Date(iso); if(isNaN(d)) return "";
+    var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return d.getDate()+" "+M[d.getMonth()]+" "+d.getFullYear(); }
+  var COURIER = { lbc:{name:"LBC", url:function(n){return "https://www.lbcexpress.com/track/?tracking_no="+encodeURIComponent(n);}},
+    fedex:{name:"FedEx", url:function(n){return "https://www.fedex.com/fedextrack/?trknbr="+encodeURIComponent(n);}},
+    philpost:{name:"PhilPost", url:function(n){return "https://tracking.phlpost.gov.ph/?barcode="+encodeURIComponent(n);}} };
+
+  function applyLang(lang){
+    LANG=lang;
+    try{ localStorage.setItem("tl_lang",lang); }catch(e){}
+    document.documentElement.lang = lang==="zh"?"zh-CN":(lang==="tl"?"tl":"en");
+    document.querySelectorAll("[data-i]").forEach(function(n){ var k=n.getAttribute("data-i"); if(I18N[lang][k]!=null) n.innerHTML=I18N[lang][k]; });
+    document.querySelectorAll(".langtabs button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.lang===lang)); });
+    if(DATA) render(DATA);
+  }
+  document.querySelectorAll(".langtabs button").forEach(function(b){ b.addEventListener("click",function(){ applyLang(b.dataset.lang); }); });
+
+  // ---------------- render ----------------
+  function render(d){
+    DATA=d; var L=I18N[LANG];
+    el("loading").classList.add("hidden"); el("err").classList.add("hidden");
+    el("tracker").classList.remove("hidden");
+    el("ono").textContent = d.order_no || "";
+
+    var status = d.status || "awaiting_payment";
+    var rank = STATE_RANK[status]; if(rank==null) rank = (status==="completed"?5:0);
+    var excType = (status==="blocked")?"block":(status==="failed"||status==="manual_review")?"fail":"";
+
+    // headline
+    var hk = (status==="completed") ? "done" : (excType?status:HEADLINE_KEY[rank]);
+    el("headline").textContent = (L.headline[hk]||L.headline.received);
+
+    // due-by
+    if(d.due_date){ el("dueby").classList.remove("hidden"); el("duebyText").textContent = L.dueBy(fmtDay(d.due_date)); }
+    else el("dueby").classList.add("hidden");
+
+    // exception banner
+    var eb=el("excBox");
+    if(excType==="block"){ eb.className="exc block"; eb.textContent=L.excBlock(d.block_reason); eb.classList.remove("hidden"); }
+    else if(excType==="fail"){ eb.className="exc fail"; eb.textContent=L.excFail; eb.classList.remove("hidden"); }
+    else eb.classList.add("hidden");
+
+    // current-stage block
+    var nowKey = HEADLINE_KEY[rank] || "received";
+    var n = L.now[nowKey] || L.now.received;
+    el("nowTitle").textContent = L.headline[nowKey] || "";
+    el("nowWhat").textContent = n.what;
+    el("nowWait").textContent = n.wait;
+    el("nowWho").textContent = n.who;
+    el("nowBox").style.display = excType ? "none" : "";
+
+    // timestamps per milestone from order_events
+    var stamps={};
+    (d.events||[]).forEach(function(ev){
+      for(var key in MS_STATES){ if(MS_STATES[key].indexOf(ev.to_status)>=0){ stamps[key]=ev.at; } }
+    });
+
+    // timeline
+    var tl=el("timeline"); tl.innerHTML="";
+    MS.forEach(function(m){
+      var st = (m.rank<rank)?"done":(m.rank===rank?"current":"pending");
+      if(m.rank<rank || (stamps[m.key]&&m.rank<=rank)) st="done"; if(m.rank===rank) st="current";
+      var li=document.createElement("li"); li.className="ms "+st;
+      var icon = st==="done"?"✓":(st==="current"?"●":"○");
+      var opt = m.opt?(' <span class="opt">'+esc(L.optNote)+'</span>'):"";
+      var tstamp = stamps[m.key]?('<div class="mtime">'+esc(fmtDate(stamps[m.key]))+'</div>'):"";
+      var extra = "";
+      if(m.key==="ready" && st!=="pending" && d.email_masked){ extra = " "+esc(L.sentTo(d.email_masked)); }
+      li.innerHTML = '<div class="col"><div class="ico">'+icon+'</div><div class="stem"></div></div>'
+        + '<div class="body"><div class="mlabel">'+esc(L.ms[m.key])+opt+'</div>'
+        + '<div class="mline">'+esc(L.msline[m.key])+extra+'</div>'+tstamp+'</div>';
+      tl.appendChild(li);
+    });
+
+    // courier extension
+    if(d.courier && d.tracking_no && COURIER[d.courier]){
+      var c=COURIER[d.courier];
+      el("courier").classList.remove("hidden");
+      el("ctNo").textContent = c.name+" · "+d.tracking_no;
+      el("ctLink").href = c.url(d.tracking_no);
+    } else el("courier").classList.add("hidden");
+  }
+
+  function showErr(msg){ el("loading").classList.add("hidden"); el("tracker").classList.add("hidden");
+    var e=el("err"); e.textContent=msg; e.classList.remove("hidden"); }
+
+  // ---------------- data ----------------
+  var DEMO = { order_no:"TL-ES-260708-671448", status:"exec_summary_prep",
+    due_date:"2026-07-13", product:"Executive Summary", email_masked:"e***o@e***e.com",
+    events:[ {to_status:"folder_shared", at:"2026-07-08T09:12:00+08:00"},
+      {to_status:"checkout_started", at:"2026-07-08T09:20:00+08:00"},
+      {to_status:"payment_confirmed", at:"2026-07-08T09:41:00+08:00"},
+      {to_status:"exec_summary_prep", at:"2026-07-08T09:42:00+08:00"} ] };
+
+  function load(){
+    var order=qp("order"), token=qp("t"), demo=qp("demo");
+    if(demo==="1"){ render(DEMO); return; }
+    if(!order || !token){ showErr(I18N[LANG].errNoLink); return; }
+    fetch(GET_STATUS_FN,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({order_no:order, token:token})})
+      .then(function(r){ return r.ok ? r.json() : r.json().then(function(j){ throw j; }); })
+      .then(function(j){ render(j); })
+      .catch(function(e){ showErr(I18N[LANG].errNotFound); });
+  }
+
+  // live updates via polling (RLS stays closed; no manual refresh)
+  function poll(){ var order=qp("order"), token=qp("t"); if(qp("demo")==="1"||!order||!token) return;
+    fetch(GET_STATUS_FN,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({order_no:order, token:token})})
+      .then(function(r){ return r.ok?r.json():null; }).then(function(j){ if(j) render(j); }).catch(function(){});
+  }
+
+  (function init(){
+    var q=qp("lang"), saved; try{ saved=localStorage.getItem("tl_lang"); }catch(e){}
+    var lang=[q,saved].find(function(l){ return l==="en"||l==="tl"||l==="zh"; })||"en";
+    applyLang(lang);
+    load();
+    setInterval(poll, POLL_MS);
+  })();
+</script>
+</body>
+</html>
