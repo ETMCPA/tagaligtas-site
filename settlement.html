@@ -118,7 +118,7 @@
   <main>
     <a href="index.html" class="back" data-i="back">← Back</a>
     <!-- PILOT TEST banner — remove when payment goes live -->
-    <div style="background:#fff7e6;border:1px solid #f0d48a;color:#7a5b00;border-radius:11px;padding:10px 13px;font-size:12.5px;font-weight:700;line-height:1.5;margin-bottom:14px">🧪 TEST MODE — you will <u>not</u> be charged. · Test lang ito — walang babayaran. · 测试模式 — 不会向你收费。</div>
+    <div id="testBanner" style="background:#fff7e6;border:1px solid #f0d48a;color:#7a5b00;border-radius:11px;padding:10px 13px;font-size:12.5px;font-weight:700;line-height:1.5;margin-bottom:14px">🧪 TEST MODE — you will <u>not</u> be charged. · Test lang ito — walang babayaran. · 测试模式 — 不会向你收费。</div>
     <div class="step" data-i="step">Step 4 · Settle your Executive Summary</div>
     <h1 class="q" data-i="title">Settle your Executive Summary</h1>
     <p class="reassure" data-i="intro">Pay the fixed fee securely below. We confirm your payment and begin your appraisal.</p>
@@ -444,7 +444,7 @@
     s.classList.add("show");
     // Clear the payment UI so only the thank-you shows.
     ["invoice","pay","reassure","q","step"].forEach(function(c){ var e=document.querySelector("."+c); if(e) e.style.display="none"; });
-    ["settleForm","payHint"].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display="none"; });
+    ["settleForm","payHint","testBanner"].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display="none"; });
     s.scrollIntoView({behavior:"smooth",block:"center"});
   })();
 </script>

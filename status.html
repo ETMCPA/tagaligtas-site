@@ -3,8 +3,9 @@
   ============================ TRACK YOUR ORDER (status.html) ============================
   Courier-style tracking (LBC / FedEx / PhilPost feel) for a TagaLigtas order.
   Access: status.html?order=[order_no]&t=[token]  (magic link from the confirmation/thank-you email)
-  Data:   read-only Edge Function get-status (POST {order_no, token}) — token-gated, rate-limited.
-          RLS stays closed to anon; the function is the only read path.
+  Data:   read-only Edge Function get-status (POST {order_no, token}) — token-gated (constant-time
+          compare). RLS stays closed to anon; the function is the only read path. TODO before wide
+          launch: add per-IP/per-order rate limiting to the function.
   Self-test locally with ?demo=1 (uses mock data; no backend needed).
   Live updates: polls get-status every 20s (no manual refresh). True Supabase Realtime would
   need a broadcast channel or a token-scoped policy — deferred; polling keeps RLS closed.
@@ -256,7 +257,7 @@
   var HEADLINE_KEY = {0:"received",1:"paid",2:"prep",3:"ready",4:"drafting",5:"served"};
 
   // ---------------- helpers ----------------
-  var LANG="en", DATA=null;
+  var LANG="en", DATA=null, POLL_TIMER=null;
   function qp(k){ var m=new RegExp("[?&]"+k+"=([^&#]+)").exec(location.search); return m?decodeURIComponent(m[1]):""; }
   function el(id){ return document.getElementById(id); }
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -289,11 +290,12 @@
     el("ono").textContent = d.order_no || "";
 
     var status = d.status || "awaiting_payment";
-    var rank = STATE_RANK[status]; if(rank==null) rank = (status==="completed"?5:0);
+    var rank = STATE_RANK[status]; if(rank==null || rank<0) rank = (status==="completed"?5:0);
     var excType = (status==="blocked")?"block":(status==="failed"||status==="manual_review")?"fail":"";
 
     // headline
-    var hk = (status==="completed") ? "done" : (excType?status:HEADLINE_KEY[rank]);
+    var hk = (status==="completed") ? "done" : (excType==="fail" ? "failed" : excType==="block" ? "blocked" : HEADLINE_KEY[rank]);
+    if(rank>=5 && POLL_TIMER){ clearInterval(POLL_TIMER); POLL_TIMER=null; }
     el("headline").textContent = (L.headline[hk]||L.headline.received);
 
     // due-by
@@ -347,7 +349,7 @@
     } else el("courier").classList.add("hidden");
   }
 
-  function showErr(msg){ el("loading").classList.add("hidden"); el("tracker").classList.add("hidden");
+  function showErr(msg){ if(POLL_TIMER){ clearInterval(POLL_TIMER); POLL_TIMER=null; } el("loading").classList.add("hidden"); el("tracker").classList.add("hidden");
     var e=el("err"); e.textContent=msg; e.classList.remove("hidden"); }
 
   // ---------------- data ----------------
@@ -381,7 +383,7 @@
     var lang=[q,saved].find(function(l){ return l==="en"||l==="tl"||l==="zh"; })||"en";
     applyLang(lang);
     load();
-    setInterval(poll, POLL_MS);
+    POLL_TIMER = setInterval(poll, POLL_MS);
   })();
 </script>
 </body>

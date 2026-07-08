@@ -12,6 +12,13 @@ const cors = {
 function json(obj: unknown, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { ...cors, "Content-Type": "application/json" } });
 }
+// Constant-time string compare (avoids token timing leaks).
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
+}
 // Mask an email for client display: e***o@e***e.com
 function maskEmail(e: string | null): string | null {
   if (!e) return null;
@@ -39,10 +46,12 @@ Deno.serve(async (req) => {
 
     const supa = createClient(SUPABASE_URL, SERVICE_ROLE);
     const { data: order, error } = await supa.from("orders")
-      .select("order_no, status, product, amount_due, due_date, email, courier, tracking_no, status_token")
+      .select("order_no, status, product, due_date, email, courier, tracking_no, status_token")
       .eq("order_no", on).maybeSingle();
     if (error) return json({ error: "server error" }, 500);
-    if (!order || !order.status_token || order.status_token !== tk) return json({ error: "not found" }, 404);
+    if (!order || !order.status_token || !timingSafeEqual(String(order.status_token), tk)) {
+      return json({ error: "not found" }, 404);
+    }
 
     const { data: events } = await supa.from("order_events")
       .select("to_status, at, note").eq("order_no", on).order("at", { ascending: true });
@@ -51,9 +60,8 @@ Deno.serve(async (req) => {
       order_no: order.order_no,
       status: order.status,
       product: order.product ?? "Executive Summary",
-      amount: order.amount_due ?? null,
       due_date: order.due_date ?? null,
-      email_masked: maskEmail(order.email),
+      email_masked: maskEmail(order.email as string | null),
       courier: order.courier ?? null,
       tracking_no: order.tracking_no ?? null,
       events: events ?? [],

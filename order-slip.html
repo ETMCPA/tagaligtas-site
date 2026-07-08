@@ -258,14 +258,17 @@
     en:{ heading:"✓ Order received — here's your copy.",
          receipt:d=>`Order No: ${ORDER_NO}\nName: ${d.name}\nEmail: ${d.email}\nMobile: ${d.mobile}\nGoogle Drive folder: ${d.drive}\n\nProduct: Executive Summary for my LoA\nAmount Due: ₱5,600.00`,
          saved:"We've saved your details securely — nothing to email. Your Executive Summary and BIR-registered Invoice will be sent to your email.",
+         saveWarn:"⚠ We couldn't confirm your details were saved. Please message us so we don't miss your order — or submit again.",
          pay:"Pay ₱5,600 & start my Executive Summary →" },
     tl:{ heading:"✓ Natanggap ang order — narito ang iyong kopya.",
          receipt:d=>`Order No: ${ORDER_NO}\nPangalan: ${d.name}\nEmail: ${d.email}\nMobile: ${d.mobile}\nGoogle Drive folder: ${d.drive}\n\nProdukto: Executive Summary para sa aking LoA\nHalagang Babayaran: ₱5,600.00`,
          saved:"Ligtas na naming nai-save ang iyong mga detalye — walang email na ipapadala. Ang iyong Executive Summary at BIR-registered Invoice ay ipapadala sa iyong email.",
+         saveWarn:"⚠ Hindi namin nakumpirma na na-save ang iyong detalye. I-message kami para hindi mapalampas ang order mo — o mag-submit muli.",
          pay:"Bayaran ang ₱5,600 & simulan ang Executive Summary ko →" },
     zh:{ heading:"✓ 已收到订单 — 这是你的副本。",
          receipt:d=>`订单号：${ORDER_NO}\n姓名：${d.name}\n电邮：${d.email}\n手机：${d.mobile}\nGoogle Drive 文件夹：${d.drive}\n\n产品：针对我的 LoA 的行政摘要\n应付金额：₱5,600.00`,
          saved:"我们已安全保存你的资料 — 无需发送邮件。你的行政摘要与 BIR 正式发票将发送到你的电邮。",
+         saveWarn:"⚠ 我们无法确认你的资料已保存。请联系我们以免遗漏你的订单 — 或再次提交。",
          pay:"支付 ₱5,600 并开始我的行政摘要 →" }
   };
 
@@ -292,7 +295,7 @@
     const S=SHARE[LANG], body=S.receipt(lastData);
     sent.innerHTML = `<div style="font-weight:800;font-size:15px;color:var(--navy)">${S.heading}</div>`
       + `<div class="msgbox">${esc(body)}</div>`
-      + `<div style="font-size:12.5px;color:var(--slate);margin-top:9px;line-height:1.5">${S.saved}</div>`
+      + `<div id="savedNote" style="font-size:12.5px;color:var(--slate);margin-top:9px;line-height:1.5">${S.saved}</div>`
       + `<a class="btn btn-primary" href="${PAY_URL}?order=${encodeURIComponent(ORDER_NO)}&lang=${LANG}" style="margin-top:13px">${S.pay}</a>`;
     sent.classList.add("show");
   }
@@ -307,8 +310,11 @@
     }
     lastData=d;
     // Reliable intake: the database capture is authoritative — no email step needed.
+    // Optimistic receipt; if the save fails, the receipt's note is swapped to a warning.
     fetch(CREATE_ORDER_FN,{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({order_no:ORDER_NO,name:d.name,email:d.email,mobile:d.mobile,drive_link:d.drive,hp:(el("uhp")?el("uhp").value:"")})}).catch(()=>{});
+      body:JSON.stringify({order_no:ORDER_NO,name:d.name,email:d.email,mobile:d.mobile,drive_link:d.drive,hp:(el("uhp")?el("uhp").value:"")})})
+      .then(function(r){ if(!r.ok) throw 0; })
+      .catch(function(){ var n=document.getElementById("savedNote"); if(n){ n.innerHTML=(SHARE[LANG].saveWarn||SHARE[LANG].saved); n.style.color="var(--amber)"; n.style.fontWeight="700"; } });
     // Carry email + order no to the payment page's thank-you (this session only).
     try{ sessionStorage.setItem("tl_order_email", d.email); sessionStorage.setItem("tl_order_no", ORDER_NO); }catch(e){}
     renderSent();

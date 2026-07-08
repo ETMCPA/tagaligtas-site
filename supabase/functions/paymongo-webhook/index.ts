@@ -58,7 +58,11 @@ Deno.serve(async (req) => {
 
   const paid = type === "checkout_session.payment.paid" || type === "payment.paid";
   if (order_no && paid) {
-    await supa.from("orders").update({ status: "paid_confirmed", updated_at: new Date().toISOString() }).eq("order_no", order_no);
+    // Only release on the exact expected amount (₱5,600 = 560000 centavos); otherwise flag for manual review.
+    const amountOk = Number(attr?.amount) === 560000;
+    await supa.from("orders")
+      .update({ status: amountOk ? "paid_confirmed" : "manual_review", updated_at: new Date().toISOString() })
+      .eq("order_no", order_no);
   }
 
   return new Response(JSON.stringify({ received: true }), { status: 200, headers: { "Content-Type": "application/json" } });
